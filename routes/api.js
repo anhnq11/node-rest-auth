@@ -17,58 +17,60 @@ const parser = bodyParser.urlencoded({ extended: true });
 
 router.use(parser);
 
+// Create new user
 router.post('/signup', async function (req, res) {
 
     if (!req.body.username || !req.body.password) {
-        res.json({ success: false, msg: 'Please pass username and password.' });
+        return res.render('api/signup', {msg: 'Please pass username and password.'});
     } else {
         var newUser = new User({
             username: req.body.username,
             password: req.body.password
         });
-        // save the user
         await newUser.save();
-
-        res.json({ success: true, msg: 'Successful created new user.' });
+        res.redirect('/api/signin');
     }
+
 });
 
+router.get('/signup', (req, res) => {
+    res.render('signup', {
+    });
+});
+
+// Login
 
 router.post('/signin', async function (req, res) {
 
-    console.log(req.body);
-
     let user = await User.findOne({username: req.body.username});
-
-    console.log(user);
-
     if (!user) {
-        res.status(401).send({ success: false, msg: 'Authentication failed. User not found.' });
+        res.status(401).render('signin', {msg: 'Tài khoản không tồn tại.'});
     } else {
-        // check if password matches
         user.comparePassword(req.body.password, function (err, isMatch) {
             if (isMatch && !err) {
-                // if user is found and password is right create a token
                 var token = jwt.sign(user.toJSON(), config.secret);
-                // return the information including token as JSON
-                res.json({ success: true, token: 'JWT ' + token });
+                return res.header("authorization", token).redirect('/api/book');
             } else {
-                res.status(401).send({ success: false, msg: 'Authentication failed. Wrong password.' });
+                res.status(401).render('signin', {msg: 'Mật khẩu không đúng.'});
             }
         });
     }
 });
 
+router.get('/signin', (req, res) => {
+    res.render('signin', {
+    });
+});
+
+// Get List Book
 
 router.post('/book', passport.authenticate('jwt', { session: false }), function (req, res) {
     var token = getToken(req.headers);
     if (token) {
         console.log(req.body);
         var newBook = new Book({
-            isbn: req.body.isbn,
             title: req.body.title,
             author: req.body.author,
-            publisher: req.body.publisher
         });
 
         newBook.save(function (err) {
@@ -86,9 +88,10 @@ router.post('/book', passport.authenticate('jwt', { session: false }), function 
 router.get('/book', passport.authenticate('jwt', { session: false }), async function (req, res) {
     var token = getToken(req.headers);
     if (token) {
-        let books = await Book.find();
-
-        res.json(books);
+        let booklist = await Book.find();
+        res.render('bookList', {
+            booklist: booklist.map(booklist => booklist.toJSON())
+        });
     } else {
         return res.status(403).send({ success: false, msg: 'Unauthorized.' });
     }
@@ -96,6 +99,7 @@ router.get('/book', passport.authenticate('jwt', { session: false }), async func
 
 getToken = function (headers) {
     if (headers && headers.authorization) {
+        console.log(headers.authorization);
         var parted = headers.authorization.split(' ');
         if (parted.length === 2) {
             return parted[1];

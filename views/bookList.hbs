@@ -1,0 +1,51 @@
+<section class="vh-100">
+    <div class="container-fluid h-custom">
+        <div class="row d-flex justify-content-center align-items-center h-100">
+            <div class="justify-content-center col-md-8 col-lg-6 col-xl-4 offset-xl-1">
+                <form method="post" action="/api/signin">
+                    <div class="divider d-flex justify-content-center align-items-center my-4">
+                        <h3 class="text-center fw-bold mx-3 mb-0">Thêm sách</h3>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" name="title" id="title"
+                            placeholder="name@example.com" required>
+                        <label for="title">Tên sách</label>
+                    </div>
+                    <div class="form-floating mb-3">
+                        <input type="text" class="form-control" name="author" id="author"
+                            placeholder="name@example.com" required>
+                        <label for="author">Tác giả</label>
+                    </div>
+                    <div class="divider d-flex justify-content-center align-items-center my-3">
+                        <button type="submit" class="btn btn-primary btn-lg fw-bold"
+                            style="padding-left: 2.5rem; padding-right: 2.5rem;">Thêm sách</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+<table class="table caption-top table-bordered">
+    <caption class="fw-semibold">Danh sách Sách</caption>
+    <thead class="table-dark">
+        <tr>
+            <th class="text-center align-middle" scope="col">#</th>
+            <th class="text-center align-middle" scope="col">Tên sách</th>
+            <th class="text-center align-middle" scope="col">Tác giả</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{#each booklist}}
+        <tr>
+            <th class="text-center align-middle" scope="row">{{sum @index 1}}</th>
+            <td class="text-center align-middle">{{this.title}}</td>
+            <td class="text-center align-middle">{{this.author}}</td>
+            {{!-- <td class="text-center align-middle">
+                <a href="update/{{this._id}}" class="btn btn-primary btn-sm">Edit</a>
+                <a href="delete/{{this._id}}" onclick="return confirm('Are you sure?')"
+                    class="btn btn-danger btn-sm">Delete</a>
+            </td> --}}
+        </tr>
+        {{/each}}
+    </tbody>
+</table>
